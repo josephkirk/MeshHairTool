@@ -649,7 +649,7 @@ def makeHairUI():
     pm.setParent('..')
     pm.showWindow()
 
-def setCommand():
+def setHotkeys():
     """Create RuntimeCommand for Hair Ops """
     if pm.hotkeySet('HairOps', q=1, exists=1):
         pm.hotkeySet('HairOps', edit=1, current=1)
