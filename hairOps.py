@@ -1,4 +1,6 @@
 import pymel.core as pm
+import random as rand
+import maya.cmds as cm
 #### misc Function copy from PipelineTools utilities
 def randU(offset=0.1):
     sel=pm.selected()
@@ -7,6 +9,26 @@ def randU(offset=0.1):
     for o in sel:
         pm.polyEditUV(o.map,u=rand.uniform(-offset,offset))
 
+def lockTransform(obs,lock=True):
+    if not obs:
+        print "no object to mirror"
+        return
+    if type(obs) != list:
+        obs = [obs]
+    for ob in obs:
+        for at in ['translate','rotate','scale']:
+            ob.attr(at).set(lock=lock)
+
+def addVrayOpenSubdivAttr():
+    '''add Vray OpenSubdiv attr to enable smooth mesh render'''
+    sel = pm.selected()
+    if not sel:
+        return
+    for o in sel:
+        if str(cm.getAttr('defaultRenderGlobals.ren')) == 'vray':
+            obShape = pm.listRelatives(o, shapes=True)[0]
+            cm.vray('addAttributesFromGroup', obShape, "vray_opensubdiv", 1)
+            pm.setAttr(obShape+".vrayOsdPreserveMapBorders", 2)
 ####Function Definition
 def rebuildControl(ob, obshape='circle', ra=1):
     '''rebuild Hair Tube Control to specific type'''
