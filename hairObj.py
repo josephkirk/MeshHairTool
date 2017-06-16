@@ -1,4 +1,5 @@
 import pymel.core as pm
+import random as rand
 ################ Persitense Variable
 HairMeshList = []
 pm.optionVar.append(HairMeshList)
@@ -26,7 +27,7 @@ def addVrayOpenSubdivAttr():
     if not sel:
         return
     for o in sel:
-        if str(cm.getAttr('defaultRenderGlobals.ren')) == 'vray':
+        if str(pm.getAttr('defaultRenderGlobals.ren')) == 'vray':
             obShape = pm.listRelatives(o, shapes=True)[0]
             cm.vray('addAttributesFromGroup', obShape, "vray_opensubdiv", 1)
             pm.setAttr(obShape+".vrayOsdPreserveMapBorders", 2)
@@ -48,7 +49,22 @@ class HairObj(object):
         self.lengthDivs = length_divisions
         self.widthDivs = width_divisions
         self.ctrlsCount = control_count 
-        self.create(control_count)
+        self.transform = None
+        self.shape = None
+        self.gen_node = None
+        self.tesselate = None
+        self.control = None
+    def getConnection(self, type=''):
+        connection = self.shape.listConnections(type=type)
+        if connection:
+            return connection[0]
+
+    def get(self):
+        if pm.objExists(self.name):
+            self.transform = pm.ls(self.name)[0]
+            self.shape = self.transform
+            self.gen_node = getConnection(type=pm.nt.Loft)
+            self.tesselate = getConnection(type=pm.nt.NurbsSurface.tesselate)
 
     def create(self,control_count):
         """Generate hairMesh"""
