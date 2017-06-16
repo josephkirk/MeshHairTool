@@ -523,6 +523,7 @@ def pickWalkHairCtrl(d='right', add=False):
     '''Pick Walk and hide Controls'''
     sel = pm.selected()
     hairInfoAll = selHair(returnInfo=True)
+    pm.setToolTo(pm.context.manipMoveContext())
     if not hairInfoAll:
         return
     ToggleHairCtrlVis(state='hide')
@@ -546,6 +547,8 @@ def pickWalkHairCtrl(d='right', add=False):
                 pm.select(ob, add=1)
             else:
                 selHair(selectTip=True)
+                if d=='left':
+                    pm.pickWalk(d='right')
                 for c in ctrls:
                     c.show()
         pm.pickWalk(d=d)
