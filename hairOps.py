@@ -2,6 +2,23 @@ import pymel.core as pm
 import random as rand
 import maya.cmds as cm
 #### misc Function copy from PipelineTools utilities
+#@do_function_on
+def mirrorTransform(obs, axis="x",xform=[0,4]):
+    if not obs:
+        print "no object to mirror"
+        return
+    axisDict = {
+        "x":('tx', 'ry', 'rz', 'sx'),
+        "y":('ty', 'rx', 'rz', 'sy'),
+        "z":('tz', 'rx', 'ry', 'sz')}
+    #print obs
+    if type(obs) != list:
+        obs = [obs]
+    for ob in obs:
+        if type(ob) == pm.nt.Transform:
+            for at in axisDict[axis][xform[0]:xform[1]]:
+                ob.attr(at).set(ob.attr(at).get()*-1)
+
 def randU(offset=0.1):
     sel=pm.selected()
     if not sel:
@@ -236,6 +253,20 @@ def makeHairMesh(name="HairMesh#",
         if curveDel:
             pm.delete(pathTransform, hi=1)
 
+def selectHairMesh(notHair=True):
+    notHairList = []
+    sel = pm.selected()
+    for ob in pm.selected():
+        pm.select(ob,r=True)
+        if not selHair(returnInfo=True):
+            notHairList.append(ob)
+    if notHair:
+        pm.select(notHairList,r=True)
+    else:
+        for notHair in notHairList:
+            sel.remove(notHair)
+        pm.select(sel,r=True)
+
 def selHair(
         selectTip=False,
         selectRoot=False,
@@ -267,7 +298,7 @@ def selHair(
             hair = o
             hairTes = o.listConnections(type=pm.nodetypes.NurbsTessellate)[0]
             hairLoft = hairTes.listConnections(type=pm.nodetypes.Loft)[0]
-            print hair, hairTes, hairLoft
+            #print hair, hairTes, hairLoft
         else:
             continue
         if all([hair, hairTes, hairLoft]):
@@ -295,7 +326,7 @@ def selHair(
                             q=1, ws=1, piv=1)[:3])
                 if rebuild[0]:
                     NewControls = ControlGroup.listRelatives(type=pm.nodetypes.Transform)
-                    print NewControls
+                    #print NewControls
                     if cShape[0]:
                         for c in NewControls:
                             rebuildControl(c, obshape=cShape[1], ra=cShape[2])
@@ -410,6 +441,12 @@ def splitHairCtrl(d='up'):
         pm.delete(hair)
         pm.select(newCtrl)
         pm.setToolTo('moveSuperContext')
+
+def instanceHair():
+    sel = pm.selected()
+    for hair in sel:
+        instanceHair = pm.instance(hair)
+        mirrorTransform(instanceHair)
 
 def dupHairMesh(mirror=False,axis='x',space='world'):
     '''duplicate a HairTube'''
