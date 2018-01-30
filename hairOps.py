@@ -47,7 +47,7 @@ def rebuildControl(ob, obshape='circle', ra=1):
                            s=shapeType[obshape][1],
                            ch=1,
                            name="HairProfileCurve#")
-    for a in [('overrideEnabled', 1), ('overrideRGBColors', 1), ('overrideColorRGB', (0.2, 0.5, 0.2))]:
+    for a in [('overrideEnabled', 1), ('overrideRGBColors', 1), ('overrideColorRGB', (1, 0, 0))]:
         obNewShape[0].getShape().attr(a[0]).set(a[1])
     pm.parent(obNewShape[0].getShape(), ob, r=1, s=1)
     pm.delete(obOldShape)
@@ -185,7 +185,7 @@ def makeHairMesh(name="HairMesh#",
                                      name="HairBaseProfileCurve")
             for a in [('overrideEnabled', 1),
                       ('overrideRGBColors', 1),
-                      ('overrideColorRGB', (0.2, 0.5, 0.2))]:
+                      ('overrideColorRGB', (1.0, 0.0, 0.0))]:
                 profileCurve[0].getShape().attr(a[0]).set(a[1])
         pm.select(d=1)
         for crv in pathCurve:
@@ -550,6 +550,19 @@ def pickWalkHairCtrl(d='right', add=False):
                     c.show()
         pm.pickWalk(d=d)
 
+def setColor(newColor):
+    if not pm.selected():
+        return
+    try:
+        for o in pm.selected():
+            mesh = o.getShape()
+            if mesh:
+                mesh.overrideEnabled.set(True)
+                mesh.overrideRGBColors.set(True)
+                mesh.overrideColorRGB.set(newColor)
+    except AttributeError as why:
+        print why
+
 def makeHairUI():
     shapeType = ['circle','triangle','square']
     axisType = ['x', 'y', 'z']
@@ -593,6 +606,13 @@ def makeHairUI():
     axisOpUI = pm.optionMenu()
     for ax in axisType:
         pm.menuItem(label=ax)
+    colorUI = pm.colorSliderGrp(
+        label='',
+        rgb=(0, 0, 1),
+        co3=(0, 0, 0),
+        cw3=(30, 60, 60),
+        cl3=('left', 'center', 'right'))
+    pm.button(label="Set", c=lambda *arg: setColor(colorUI.getRgbValue()))
     pm.button(label="SelectCtr", c=lambda *arg: selHair())
     pm.popupMenu()
     pm.menuItem(label='Set pivot to root',
